@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Manage Announcements - School Information System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-bullhorn"></i> Manage Announcements</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'add_announcement' %}" class="btn btn-sm btn-primary">
+                <i class="fas fa-plus"></i> Add Announcement
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-bullhorn fa-2x text-primary mb-2"></i>
+                <h5 class="card-title">{{ announcements.count }}</h5>
+                <p class="card-text text-muted">Total Announcements</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-eye fa-2x text-success mb-2"></i>
+                <h5 class="card-title">Active</h5>
+                <p class="card-text text-muted">Published</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-exclamation fa-2x text-warning mb-2"></i>
+                <h5 class="card-title">High Priority</h5>
+                <p class="card-text text-muted">Important</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-calendar fa-2x text-info mb-2"></i>
+                <h5 class="card-title">This Month</h5>
+                <p class="card-text text-muted">Recent</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-filter"></i> Filter Announcements</h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label for="category" class="form-label">Category</label>
+                <select class="form-select" id="category" name="category">
+                    <option value="">All Categories</option>
+                    <option value="academic">Academic</option>
+                    <option value="administrative">Administrative</option>
+                    <option value="event">Event</option>
+                    <option value="urgent">Urgent</option>
+                    <option value="general">General</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="priority" class="form-label">Priority</label>
+                <select class="form-select" id="priority" name="priority">
+                    <option value="">All Priorities</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="fas fa-search"></i> Filter
+                </button>
+                <a href="{% url 'manage_announcements' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-undo"></i> Reset
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Announcements Table -->
+{% if announcements %}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">All Announcements</h5>
+            <div class="btn-group btn-group-sm">
+                <button type="button" class="btn btn-outline-primary">
+                    <i class="fas fa-download"></i> Export
+                </button>
+                <button type="button" class="btn btn-outline-success">
+                    <i class="fas fa-print"></i> Print
+                </button>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Announcement</th>
+                            <th>Author</th>
+                            <th>Category</th>
+                            <th>Priority</th>
+                            <th>Audience</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for announcement in announcements %}
+                            <tr>
+                                <td>
+                                    <div>
+                                        <strong>{{ announcement.title }}</strong>
+                                        <br><small class="text-muted">{{ announcement.content|truncatewords:10 }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle me-2">
+                                            {{ announcement.author.first_name|first }}{{ announcement.author.last_name|first }}
+                                        </div>
+                                        <div>
+                                            <strong>{{ announcement.author.get_full_name }}</strong>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if announcement.category == 'academic' %}
+                                        <span class="badge bg-primary">Academic</span>
+                                    {% elif announcement.category == 'administrative' %}
+                                        <span class="badge bg-info">Administrative</span>
+                                    {% elif announcement.category == 'event' %}
+                                        <span class="badge bg-success">Event</span>
+                                    {% elif announcement.category == 'urgent' %}
+                                        <span class="badge bg-danger">Urgent</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">General</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if announcement.priority == 'high' %}
+                                        <span class="badge bg-danger">High</span>
+                                    {% elif announcement.priority == 'medium' %}
+                                        <span class="badge bg-warning">Medium</span>
+                                    {% else %}
+                                        <span class="badge bg-info">Low</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if announcement.target_audience == 'all' %}
+                                        <span class="badge bg-primary">All</span>
+                                    {% elif announcement.target_audience == 'students' %}
+                                        <span class="badge bg-success">Students</span>
+                                    {% elif announcement.target_audience == 'staff' %}
+                                        <span class="badge bg-warning">Staff</span>
+                                    {% else %}
+                                        <span class="badge bg-info">Faculty</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if announcement.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>{{ announcement.created_at|date:"M d" }}</strong>
+                                    <br><small class="text-muted">{{ announcement.created_at|date:"Y" }}</small>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{% url 'announcement_detail' announcement.id %}" class="btn btn-outline-info" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'edit_announcement' announcement.id %}" class="btn btn-outline-primary" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#deleteModal{{ announcement.id }}" 
+                                                title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="deleteModal{{ announcement.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Confirm Delete</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to delete the announcement <strong>"{{ announcement.title }}"</strong>? This action cannot be undone.
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <form method="POST" action="{% url 'delete_announcement' announcement.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-bullhorn fa-3x text-muted mb-3"></i>
+        <h4 class="text-muted">No Announcements Found</h4>
+        <p class="text-muted">Start by creating your first announcement.</p>
+        <a href="{% url 'add_announcement' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create First Announcement
+        </a>
+    </div>
+{% endif %}
+
+<style>
+.avatar-circle {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 12px;
+}
+</style>
+{% endblock %}

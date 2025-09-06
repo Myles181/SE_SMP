@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Results - School Information System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-trophy"></i> Results</h1>
+    {% if user.user_type == 'admin' %}
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="btn-group me-2">
+                <a href="{% url 'add_result' %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-plus"></i> Add Result
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% if results %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Student</th>
+                    <th>Course</th>
+                    <th>Assessment Type</th>
+                    <th>Score</th>
+                    <th>Grade</th>
+                    <th>Date</th>
+                    {% if user.user_type == 'admin' %}
+                        <th>Actions</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-circle me-2">
+                                    {{ result.student.user.first_name|first }}{{ result.student.user.last_name|first }}
+                                </div>
+                                <div>
+                                    <strong>{{ result.student.user.get_full_name }}</strong>
+                                    <br><small class="text-muted">{{ result.student.student_id }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <strong>{{ result.course.name }}</strong>
+                            <br><small class="text-muted">{{ result.course.code }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ result.assessment_type }}</span>
+                        </td>
+                        <td>
+                            <strong>{{ result.score }}/{{ result.total_marks }}</strong>
+                        </td>
+                        <td>
+                            {% if result.grade == 'A' %}
+                                <span class="badge bg-success">{{ result.grade }}</span>
+                            {% elif result.grade == 'B' %}
+                                <span class="badge bg-primary">{{ result.grade }}</span>
+                            {% elif result.grade == 'C' %}
+                                <span class="badge bg-warning">{{ result.grade }}</span>
+                            {% elif result.grade == 'D' %}
+                                <span class="badge bg-danger">{{ result.grade }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ result.grade }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ result.date_recorded|date:"M d, Y" }}</td>
+                        {% if user.user_type == 'admin' %}
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{% url 'edit_result' result.id %}" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ result.id }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-trophy fa-3x text-muted mb-3"></i>
+        <h4 class="text-muted">No Results Available</h4>
+        {% if user.user_type == 'student' %}
+            <p class="text-muted">Your results will appear here once they are published.</p>
+        {% else %}
+            <p class="text-muted">No results have been recorded yet.</p>
+        {% endif %}
+    </div>
+{% endif %}
+
+<style>
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+}
+</style>
+{% endblock %}

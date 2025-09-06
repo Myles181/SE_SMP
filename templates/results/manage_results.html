@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Manage Results - School Information System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-chart-bar"></i> Manage Results</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'add_result' %}" class="btn btn-sm btn-primary">
+                <i class="fas fa-plus"></i> Add Result
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-trophy fa-2x text-primary mb-2"></i>
+                <h5 class="card-title">{{ results.count }}</h5>
+                <p class="card-text text-muted">Total Results</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-medal fa-2x text-success mb-2"></i>
+                <h5 class="card-title">{{ results|length }}</h5>
+                <p class="card-text text-muted">This Semester</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                <h5 class="card-title">A+ Grades</h5>
+                <p class="card-text text-muted">Excellence</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-chart-line fa-2x text-info mb-2"></i>
+                <h5 class="card-title">Analytics</h5>
+                <p class="card-text text-muted">Performance</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-filter"></i> Filter Results</h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label for="course" class="form-label">Course</label>
+                <select class="form-select" id="course" name="course">
+                    <option value="">All Courses</option>
+                    <!-- Add course options dynamically -->
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="assessment_type" class="form-label">Assessment Type</label>
+                <select class="form-select" id="assessment_type" name="assessment_type">
+                    <option value="">All Types</option>
+                    <option value="exam">Exam</option>
+                    <option value="assignment">Assignment</option>
+                    <option value="quiz">Quiz</option>
+                    <option value="project">Project</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="grade" class="form-label">Grade</label>
+                <select class="form-select" id="grade" name="grade">
+                    <option value="">All Grades</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="F">F</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="fas fa-search"></i> Filter
+                </button>
+                <a href="{% url 'manage_results' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-undo"></i> Reset
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Results Table -->
+{% if results %}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">All Results</h5>
+            <div class="btn-group btn-group-sm">
+                <button type="button" class="btn btn-outline-primary">
+                    <i class="fas fa-download"></i> Export
+                </button>
+                <button type="button" class="btn btn-outline-success">
+                    <i class="fas fa-file-excel"></i> Excel
+                </button>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Student</th>
+                            <th>Course</th>
+                            <th>Assessment</th>
+                            <th>Score</th>
+                            <th>Grade</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle me-2">
+                                            {{ result.student.user.first_name|first }}{{ result.student.user.last_name|first }}
+                                        </div>
+                                        <div>
+                                            <strong>{{ result.student.user.get_full_name }}</strong>
+                                            <br><small class="text-muted">{{ result.student.student_id }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong>{{ result.course.name }}</strong>
+                                    <br><small class="text-muted">{{ result.course.code }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ result.assessment_type }}</span>
+                                </td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: {{ result.score|floatformat:0 }}%"
+                                             aria-valuenow="{{ result.score }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="{{ result.total_marks }}">
+                                            {{ result.score }}/{{ result.total_marks }}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if result.grade == 'A' %}
+                                        <span class="badge bg-success fs-6">{{ result.grade }}</span>
+                                    {% elif result.grade == 'B' %}
+                                        <span class="badge bg-primary fs-6">{{ result.grade }}</span>
+                                    {% elif result.grade == 'C' %}
+                                        <span class="badge bg-warning fs-6">{{ result.grade }}</span>
+                                    {% elif result.grade == 'D' %}
+                                        <span class="badge bg-danger fs-6">{{ result.grade }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary fs-6">{{ result.grade }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ result.date_recorded|date:"M d, Y" }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{% url 'edit_result' result.id %}" class="btn btn-outline-primary" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#deleteModal{{ result.id }}" 
+                                                title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="deleteModal{{ result.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Confirm Delete</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to delete this result for <strong>{{ result.student.user.get_full_name }}</strong> in <strong>{{ result.course.name }}</strong>?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <form method="POST" action="{% url 'delete_result' result.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+        <h4 class="text-muted">No Results Found</h4>
+        <p class="text-muted">Start by adding some results to the system.</p>
+        <a href="{% url 'add_result' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add First Result
+        </a>
+    </div>
+{% endif %}
+
+<style>
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+}
+</style>
+{% endblock %}

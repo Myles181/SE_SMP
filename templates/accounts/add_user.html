@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Add User - School Information System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-plus"></i> Add User</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'user_list' %}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Users
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user-plus"></i> User Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name *</label>
+                            {{ form.first_name|add_class:"form-control" }}
+                            {% if form.first_name.errors %}
+                                <div class="text-danger small mt-1">{{ form.first_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name *</label>
+                            {{ form.last_name|add_class:"form-control" }}
+                            {% if form.last_name.errors %}
+                                <div class="text-danger small mt-1">{{ form.last_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.username.id_for_label }}" class="form-label">Username *</label>
+                            {{ form.username|add_class:"form-control" }}
+                            {% if form.username.errors %}
+                                <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">Email *</label>
+                            {{ form.email|add_class:"form-control" }}
+                            {% if form.email.errors %}
+                                <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.password1.id_for_label }}" class="form-label">Password *</label>
+                            {{ form.password1|add_class:"form-control" }}
+                            {% if form.password1.errors %}
+                                <div class="text-danger small mt-1">{{ form.password1.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.password2.id_for_label }}" class="form-label">Confirm Password *</label>
+                            {{ form.password2|add_class:"form-control" }}
+                            {% if form.password2.errors %}
+                                <div class="text-danger small mt-1">{{ form.password2.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.user_type.id_for_label }}" class="form-label">User Type *</label>
+                            {{ form.user_type|add_class:"form-select" }}
+                            {% if form.user_type.errors %}
+                                <div class="text-danger small mt-1">{{ form.user_type.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.phone.id_for_label }}" class="form-label">Phone Number</label>
+                            {{ form.phone|add_class:"form-control" }}
+                            {% if form.phone.errors %}
+                                <div class="text-danger small mt-1">{{ form.phone.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.date_of_birth.id_for_label }}" class="form-label">Date of Birth</label>
+                            {{ form.date_of_birth|add_class:"form-control" }}
+                            {% if form.date_of_birth.errors %}
+                                <div class="text-danger small mt-1">{{ form.date_of_birth.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.gender.id_for_label }}" class="form-label">Gender</label>
+                            {{ form.gender|add_class:"form-select" }}
+                            {% if form.gender.errors %}
+                                <div class="text-danger small mt-1">{{ form.gender.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.address.id_for_label }}" class="form-label">Address</label>
+                        {{ form.address|add_class:"form-control" }}
+                        {% if form.address.errors %}
+                            <div class="text-danger small mt-1">{{ form.address.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Student-specific fields -->
+                    <div id="student-fields" style="display: none;">
+                        <h6 class="text-primary mb-3">Student Information</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.student_id.id_for_label }}" class="form-label">Student ID</label>
+                                {{ form.student_id|add_class:"form-control" }}
+                                {% if form.student_id.errors %}
+                                    <div class="text-danger small mt-1">{{ form.student_id.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.department.id_for_label }}" class="form-label">Department</label>
+                                {{ form.department|add_class:"form-select" }}
+                                {% if form.department.errors %}
+                                    <div class="text-danger small mt-1">{{ form.department.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Staff-specific fields -->
+                    <div id="staff-fields" style="display: none;">
+                        <h6 class="text-warning mb-3">Staff Information</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.employee_id.id_for_label }}" class="form-label">Employee ID</label>
+                                {{ form.employee_id|add_class:"form-control" }}
+                                {% if form.employee_id.errors %}
+                                    <div class="text-danger small mt-1">{{ form.employee_id.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.position.id_for_label }}" class="form-label">Position</label>
+                                {{ form.position|add_class:"form-control" }}
+                                {% if form.position.errors %}
+                                    <div class="text-danger small mt-1">{{ form.position.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.is_active|add_class:"form-check-input" }}
+                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                Active User
+                            </label>
+                            <small class="form-text text-muted d-block">User can log in and access the system</small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'user_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Create User
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- User Types -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-users-cog"></i> User Types</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <span class="badge bg-danger me-2">Admin</span>
+                    <small class="text-muted">Full system access</small>
+                </div>
+                <div class="mb-2">
+                    <span class="badge bg-success me-2">Student</span>
+                    <small class="text-muted">Student portal access</small>
+                </div>
+                <div class="mb-2">
+                    <span class="badge bg-warning me-2">Staff</span>
+                    <small class="text-muted">Staff portal access</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Password Requirements -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-lock"></i> Password Requirements</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-1">
+                        <i class="fas fa-check text-success me-2"></i>
+                        <small>At least 8 characters</small>
+                    </li>
+                    <li class="mb-1">
+                        <i class="fas fa-check text-success me-2"></i>
+                        <small>Mix of letters and numbers</small>
+                    </li>
+                    <li class="mb-1">
+                        <i class="fas fa-check text-success me-2"></i>
+                        <small>Include special characters</small>
+                    </li>
+                    <li>
+                        <i class="fas fa-check text-success me-2"></i>
+                        <small>Avoid common passwords</small>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Tips -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-lightbulb"></i> Tips</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <i class="fas fa-info text-primary me-2"></i>
+                        <small>Username must be unique</small>
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-info text-primary me-2"></i>
+                        <small>Email will be used for notifications</small>
+                    </li>
+                    <li>
+                        <i class="fas fa-info text-primary me-2"></i>
+                        <small>User type determines access level</small>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const userTypeSelect = document.getElementById('{{ form.user_type.id_for_label }}');
+    const studentFields = document.getElementById('student-fields');
+    const staffFields = document.getElementById('staff-fields');
+
+    function toggleFields() {
+        const userType = userTypeSelect.value;
+        
+        // Hide all specific fields
+        studentFields.style.display = 'none';
+        staffFields.style.display = 'none';
+        
+        // Show relevant fields
+        if (userType === 'student') {
+            studentFields.style.display = 'block';
+        } else if (userType === 'staff') {
+            staffFields.style.display = 'block';
+        }
+    }
+
+    userTypeSelect.addEventListener('change', toggleFields);
+    toggleFields(); // Initial call
+});
+</script>
+{% endblock %}

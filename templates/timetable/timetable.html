@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Timetable - School Information System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-table"></i> Timetable</h1>
+    {% if user.user_type == 'admin' %}
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="btn-group me-2">
+                <a href="{% url 'add_timetable_entry' %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-plus"></i> Add Entry
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% if timetable_entries %}
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-calendar-week"></i> 
+                {% if user.user_type == 'student' %}
+                    My Class Schedule
+                {% else %}
+                    Weekly Schedule
+                {% endif %}
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th width="100">Time</th>
+                            <th>Monday</th>
+                            <th>Tuesday</th>
+                            <th>Wednesday</th>
+                            <th>Thursday</th>
+                            <th>Friday</th>
+                            <th>Saturday</th>
+                            <th>Sunday</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% regroup timetable_entries by start_time as time_groups %}
+                        {% for time_group in time_groups %}
+                            <tr>
+                                <td class="text-center fw-bold bg-light">
+                                    {{ time_group.grouper|time:"H:i" }}
+                                    <br>
+                                    <small class="text-muted">{{ time_group.list.0.end_time|time:"H:i" }}</small>
+                                </td>
+                                {% for day_num in "1234567"|make_list %}
+                                    <td class="p-2">
+                                        {% for entry in time_group.list %}
+                                            {% if entry.day_of_week == day_num|add:0 %}
+                                                <div class="timetable-entry">
+                                                    <div class="course-card">
+                                                        <strong class="course-name">{{ entry.course.name }}</strong>
+                                                        <div class="course-code">{{ entry.course.code }}</div>
+                                                        <div class="course-room">
+                                                            <i class="fas fa-map-marker-alt"></i> {{ entry.room|default:"TBA" }}
+                                                        </div>
+                                                        {% if entry.instructor %}
+                                                            <div class="course-instructor">
+                                                                <i class="fas fa-user"></i> {{ entry.instructor.get_full_name }}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-info-circle"></i> Legend</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="legend-box bg-primary me-2"></div>
+                                <small>Lecture</small>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="legend-box bg-success me-2"></div>
+                                <small>Lab</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="legend-box bg-warning me-2"></div>
+                                <small>Tutorial</small>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="legend-box bg-info me-2"></div>
+                                <small>Seminar</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-clock"></i> Quick Stats</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <h5 class="text-primary">{{ timetable_entries|length }}</h5>
+                            <small class="text-muted">Total Classes</small>
+                        </div>
+                        <div class="col-4">
+                            <h5 class="text-success">5</h5>
+                            <small class="text-muted">Days/Week</small>
+                        </div>
+                        <div class="col-4">
+                            <h5 class="text-info">8</h5>
+                            <small class="text-muted">Hours/Day</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+        <h4 class="text-muted">No Timetable Available</h4>
+        {% if user.user_type == 'student' %}
+            <p class="text-muted">Your class schedule will appear here once courses are scheduled.</p>
+        {% else %}
+            <p class="text-muted">No classes have been scheduled yet.</p>
+            {% if user.user_type == 'admin' %}
+                <a href="{% url 'add_timetable_entry' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add First Entry
+                </a>
+            {% endif %}
+        {% endif %}
+    </div>
+{% endif %}
+
+<style>
+.timetable-entry {
+    min-height: 80px;
+}
+
+.course-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    margin-bottom: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.course-name {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 2px;
+}
+
+.course-code {
+    font-size: 11px;
+    opacity: 0.9;
+    margin-bottom: 2px;
+}
+
+.course-room, .course-instructor {
+    font-size: 10px;
+    opacity: 0.8;
+    margin-bottom: 1px;
+}
+
+.legend-box {
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+}
+
+.table td {
+    vertical-align: top;
+    min-height: 100px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 12px;
+    }
+    
+    .course-card {
+        padding: 4px;
+        font-size: 10px;
+    }
+    
+    .course-name {
+        font-size: 11px;
+    }
+}
+</style>
+{% endblock %}

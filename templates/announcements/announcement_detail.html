@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ announcement.title }} - School Information System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-bullhorn"></i> {{ announcement.title }}</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'announcement_list' %}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Announcements
+            </a>
+            {% if user.user_type == 'admin' %}
+                <a href="{% url 'edit_announcement' announcement.id %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-edit"></i> Edit Announcement
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Announcement Content -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <div class="avatar-circle me-3">
+                        {{ announcement.author.first_name|first }}{{ announcement.author.last_name|first }}
+                    </div>
+                    <div>
+                        <h6 class="mb-0">{{ announcement.author.get_full_name }}</h6>
+                        <small class="text-muted">{{ announcement.created_at|date:"F d, Y g:i A" }}</small>
+                    </div>
+                </div>
+                {% if announcement.priority == 'high' %}
+                    <span class="badge bg-danger">High Priority</span>
+                {% elif announcement.priority == 'medium' %}
+                    <span class="badge bg-warning">Medium Priority</span>
+                {% else %}
+                    <span class="badge bg-info">Normal Priority</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="announcement-content">
+                    {{ announcement.content|linebreaks }}
+                </div>
+                
+                {% if announcement.attachment %}
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <h6><i class="fas fa-paperclip"></i> Attachment</h6>
+                        <a href="{{ announcement.attachment.url }}" class="btn btn-outline-primary btn-sm" target="_blank">
+                            <i class="fas fa-download"></i> Download Attachment
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Related Announcements -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-list"></i> Recent Announcements</h5>
+            </div>
+            <div class="card-body">
+                <!-- Add related announcements logic here -->
+                <p class="text-muted mb-0">Check the announcements page for more updates.</p>
+                <a href="{% url 'announcement_list' %}" class="btn btn-sm btn-outline-primary mt-2">
+                    View All Announcements
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Announcement Info -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-info-circle"></i> Announcement Info</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <strong>Category:</strong>
+                    <span class="badge bg-primary ms-1">{{ announcement.category|title }}</span>
+                </div>
+                <div class="mb-2">
+                    <strong>Priority:</strong>
+                    {% if announcement.priority == 'high' %}
+                        <span class="badge bg-danger ms-1">High</span>
+                    {% elif announcement.priority == 'medium' %}
+                        <span class="badge bg-warning ms-1">Medium</span>
+                    {% else %}
+                        <span class="badge bg-info ms-1">Normal</span>
+                    {% endif %}
+                </div>
+                <div class="mb-2">
+                    <strong>Status:</strong>
+                    {% if announcement.is_active %}
+                        <span class="badge bg-success ms-1">Active</span>
+                    {% else %}
+                        <span class="badge bg-secondary ms-1">Inactive</span>
+                    {% endif %}
+                </div>
+                {% if announcement.expiry_date %}
+                    <div class="mb-2">
+                        <strong>Expires:</strong>
+                        <br><small class="text-muted">{{ announcement.expiry_date|date:"M d, Y" }}</small>
+                    </div>
+                {% endif %}
+                <div class="mb-2">
+                    <strong>Published:</strong>
+                    <br><small class="text-muted">{{ announcement.created_at|date:"M d, Y g:i A" }}</small>
+                </div>
+                {% if announcement.updated_at != announcement.created_at %}
+                    <div class="mb-2">
+                        <strong>Last Updated:</strong>
+                        <br><small class="text-muted">{{ announcement.updated_at|date:"M d, Y g:i A" }}</small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Target Audience -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-users"></i> Target Audience</h6>
+            </div>
+            <div class="card-body">
+                {% if announcement.target_audience == 'all' %}
+                    <span class="badge bg-primary">All Users</span>
+                {% elif announcement.target_audience == 'students' %}
+                    <span class="badge bg-success">Students Only</span>
+                {% elif announcement.target_audience == 'staff' %}
+                    <span class="badge bg-warning">Staff Only</span>
+                {% elif announcement.target_audience == 'faculty' %}
+                    <span class="badge bg-info">Faculty Only</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-cog"></i> Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="shareAnnouncement()">
+                        <i class="fas fa-share"></i> Share
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" onclick="printAnnouncement()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                    {% if user.user_type == 'admin' %}
+                        <button class="btn btn-outline-warning btn-sm" onclick="toggleStatus()">
+                            <i class="fas fa-toggle-on"></i> Toggle Status
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-circle {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.announcement-content {
+    line-height: 1.7;
+    font-size: 16px;
+}
+
+.announcement-content p {
+    margin-bottom: 1rem;
+}
+
+.card-header h6 {
+    color: #495057;
+}
+</style>
+
+<script>
+function shareAnnouncement() {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(function() {
+        alert('Announcement link copied to clipboard!');
+    });
+}
+
+function printAnnouncement() {
+    window.print();
+}
+
+{% if user.user_type == 'admin' %}
+function toggleStatus() {
+    if (confirm('Are you sure you want to toggle the status of this announcement?')) {
+        // Implement toggle status functionality
+        alert('Status toggle feature coming soon!');
+    }
+}
+{% endif %}
+</script>
+{% endblock %}

@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{{ event.title }} - School Information System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-calendar-alt"></i> {{ event.title }}</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'event_list' %}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Events
+            </a>
+            {% if user.user_type == 'admin' %}
+                <a href="{% url 'edit_event' event.id %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-edit"></i> Edit Event
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Event Details Card -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Event Details</h5>
+                {% if event.is_featured %}
+                    <span class="badge bg-warning">Featured</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-calendar text-primary"></i> Date & Time</h6>
+                        <p class="mb-1"><strong>{{ event.date|date:"F d, Y" }}</strong></p>
+                        <p class="text-muted">{{ event.start_time|time:"g:i A" }} - {{ event.end_time|time:"g:i A" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-map-marker-alt text-danger"></i> Location</h6>
+                        <p class="mb-1">{{ event.location|default:"TBA" }}</p>
+                        {% if event.venue %}
+                            <p class="text-muted">{{ event.venue }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-user text-success"></i> Organizer</h6>
+                        <p>{{ event.organizer.get_full_name }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-users text-info"></i> Capacity</h6>
+                        <p>
+                            {% if event.max_participants %}
+                                {{ registrations_count }}/{{ event.max_participants }} participants
+                                <div class="progress mt-1" style="height: 8px;">
+                                    <div class="progress-bar" role="progressbar" 
+                                         style="width: {% widthratio registrations_count event.max_participants 100 %}%">
+                                    </div>
+                                </div>
+                            {% else %}
+                                {{ registrations_count }} participants (No limit)
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <h6><i class="fas fa-align-left text-secondary"></i> Description</h6>
+                    <div class="event-description">
+                        {{ event.description|linebreaks }}
+                    </div>
+                </div>
+
+                {% if event.requirements %}
+                    <div class="mb-3">
+                        <h6><i class="fas fa-list-check text-warning"></i> Requirements</h6>
+                        <div class="alert alert-info">
+                            {{ event.requirements|linebreaks }}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Registration Status -->
+        {% if user.user_type == 'student' %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Registration Status</h5>
+                </div>
+                <div class="card-body">
+                    {% if is_registered %}
+                        <div class="alert alert-success d-flex align-items-center">
+                            <i class="fas fa-check-circle fa-2x me-3"></i>
+                            <div>
+                                <h6 class="mb-1">You're registered for this event!</h6>
+                                <p class="mb-0">We'll send you reminders as the event approaches.</p>
+                            </div>
+                        </div>
+                        <form method="POST" action="{% url 'unregister_event' event.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger">
+                                <i class="fas fa-times"></i> Unregister
+                            </button>
+                        </form>
+                    {% else %}
+                        {% if event.registration_deadline and event.registration_deadline < today %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Registration deadline has passed.
+                            </div>
+                        {% elif event.max_participants and registrations_count >= event.max_participants %}
+                            <div class="alert alert-danger">
+                                <i class="fas fa-users"></i>
+                                This event is full. Registration is closed.
+                            </div>
+                        {% else %}
+                            <form method="POST" action="{% url 'register_event' event.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Register for Event
+                                </button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="col-md-4">
+        <!-- Quick Info -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-info-circle"></i> Quick Info</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <strong>Event Type:</strong>
+                    <span class="badge bg-primary ms-1">{{ event.event_type|title }}</span>
+                </div>
+                <div class="mb-2">
+                    <strong>Status:</strong>
+                    {% if event.is_active %}
+                        <span class="badge bg-success ms-1">Active</span>
+                    {% else %}
+                        <span class="badge bg-secondary ms-1">Inactive</span>
+                    {% endif %}
+                </div>
+                {% if event.registration_deadline %}
+                    <div class="mb-2">
+                        <strong>Registration Deadline:</strong>
+                        <br><small class="text-muted">{{ event.registration_deadline|date:"M d, Y" }}</small>
+                    </div>
+                {% endif %}
+                <div class="mb-2">
+                    <strong>Created:</strong>
+                    <br><small class="text-muted">{{ event.created_at|date:"M d, Y" }}</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Events -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-calendar"></i> Upcoming Events</h6>
+            </div>
+            <div class="card-body">
+                <!-- Add related events logic here -->
+                <p class="text-muted mb-0">Check the events page for more upcoming events.</p>
+                <a href="{% url 'event_list' %}" class="btn btn-sm btn-outline-primary mt-2">
+                    View All Events
+                </a>
+            </div>
+        </div>
+
+        <!-- Share Event -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-share-alt"></i> Share Event</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="shareEvent()">
+                        <i class="fas fa-link"></i> Copy Link
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" onclick="downloadCalendar()">
+                        <i class="fas fa-download"></i> Add to Calendar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.event-description {
+    line-height: 1.6;
+}
+
+.progress {
+    background-color: #e9ecef;
+}
+
+.card-header h5, .card-header h6 {
+    color: #495057;
+}
+</style>
+
+<script>
+function shareEvent() {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(function() {
+        alert('Event link copied to clipboard!');
+    });
+}
+
+function downloadCalendar() {
+    // Implement calendar download functionality
+    alert('Calendar download feature coming soon!');
+}
+</script>
+{% endblock %}

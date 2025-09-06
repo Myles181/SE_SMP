@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Instructor - School Information System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="fas fa-edit me-2"></i>Edit Instructor
+                        </h4>
+                        <a href="{% url 'instructor_list' %}" class="btn btn-light btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Instructors
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Error:</strong>
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <form method="post">
+                                {% csrf_token %}
+                                
+                                <!-- Current Instructor Info -->
+                                <div class="card mb-4 bg-light">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <div class="avatar-lg bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                                                    {{ staff.user.first_name|first }}{{ staff.user.last_name|first }}
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <h5 class="mb-1">{{ staff.user.get_full_name }}</h5>
+                                                <p class="text-muted mb-1">{{ staff.staff_id }} • {{ staff.position }}</p>
+                                                <p class="text-muted mb-0">{{ staff.department.name }}</p>
+                                            </div>
+                                            <div class="col-auto">
+                                                {% if staff.user.is_active %}
+                                                    <span class="badge bg-success fs-6">
+                                                        <i class="fas fa-check-circle me-1"></i>Active
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge bg-danger fs-6">
+                                                        <i class="fas fa-times-circle me-1"></i>Inactive
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- User Information Section -->
+                                <div class="card mb-4">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-user me-2"></i>Personal Information
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name</label>
+                                                {{ form.first_name }}
+                                                {% if form.first_name.errors %}
+                                                    <div class="alert alert-danger mt-2 py-2">
+                                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                                        {% for error in form.first_name.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name</label>
+                                                {{ form.last_name }}
+                                                {% if form.last_name.errors %}
+                                                    <div class="alert alert-danger mt-2 py-2">
+                                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                                        {% for error in form.last_name.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                                            {{ form.email }}
+                                            {% if form.email.errors %}
+                                                <div class="alert alert-danger mt-2 py-2">
+                                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                                    {% for error in form.email.errors %}
+                                                        {{ error }}
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Staff Information Section -->
+                                <div class="card mb-4">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-id-badge me-2"></i>Staff Information
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="{{ form.staff_id.id_for_label }}" class="form-label">Staff ID</label>
+                                                {{ form.staff_id }}
+                                                {% if form.staff_id.errors %}
+                                                    <div class="alert alert-danger mt-2 py-2">
+                                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                                        {% for error in form.staff_id.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                                <small class="form-text text-muted">{{ form.staff_id.help_text }}</small>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="{{ form.department.id_for_label }}" class="form-label">Department</label>
+                                                {{ form.department }}
+                                                {% if form.department.errors %}
+                                                    <div class="alert alert-danger mt-2 py-2">
+                                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                                        {% for error in form.department.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="{{ form.position.id_for_label }}" class="form-label">Position</label>
+                                                {{ form.position }}
+                                                {% if form.position.errors %}
+                                                    <div class="alert alert-danger mt-2 py-2">
+                                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                                        {% for error in form.position.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                                <small class="form-text text-muted">{{ form.position.help_text }}</small>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="{{ form.hire_date.id_for_label }}" class="form-label">Hire Date</label>
+                                                {{ form.hire_date }}
+                                                {% if form.hire_date.errors %}
+                                                    <div class="alert alert-danger mt-2 py-2">
+                                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                                        {% for error in form.hire_date.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'instructor_list' %}" class="btn btn-secondary">
+                                        <i class="fas fa-times me-1"></i>Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-1"></i>Update Instructor
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div class="col-lg-4">
+                            <div class="card bg-light">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-info-circle me-2"></i>Edit Guidelines
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            Update personal and contact information
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            Change department or position as needed
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            Staff ID should remain unique
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            Changes take effect immediately
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="card mt-3">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-clock me-2"></i>Instructor History
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-2"><strong>Hired:</strong> {{ staff.hire_date|date:"F d, Y" }}</p>
+                                    <p class="mb-2"><strong>Username:</strong> {{ staff.user.username }}</p>
+                                    <p class="mb-0"><strong>Last Login:</strong> 
+                                        {% if staff.user.last_login %}
+                                            {{ staff.user.last_login|date:"M d, Y H:i" }}
+                                        {% else %}
+                                            Never
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control, .form-select {
+        border-radius: 0.375rem;
+        border: 1px solid #ced4da;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .alert-danger {
+        background-color: rgba(220, 53, 69, 0.1);
+        border-color: rgba(220, 53, 69, 0.2);
+        color: #721c24;
+    }
+    
+    .avatar-lg {
+        font-weight: bold;
+    }
+</style>
+{% endblock %}

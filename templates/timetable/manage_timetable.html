@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Manage Timetable - School Information System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-clock"></i> Manage Timetable</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'add_timetable_entry' %}" class="btn btn-sm btn-primary">
+                <i class="fas fa-plus"></i> Add Entry
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-calendar fa-2x text-primary mb-2"></i>
+                <h5 class="card-title">{{ timetable_entries.count }}</h5>
+                <p class="card-text text-muted">Total Entries</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-book fa-2x text-success mb-2"></i>
+                <h5 class="card-title">Active Courses</h5>
+                <p class="card-text text-muted">This Semester</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-users fa-2x text-warning mb-2"></i>
+                <h5 class="card-title">Instructors</h5>
+                <p class="card-text text-muted">Teaching</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-door-open fa-2x text-info mb-2"></i>
+                <h5 class="card-title">Rooms</h5>
+                <p class="card-text text-muted">In Use</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-filter"></i> Filter Timetable</h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label for="course" class="form-label">Course</label>
+                <select class="form-select" id="course" name="course">
+                    <option value="">All Courses</option>
+                    <!-- Add course options dynamically -->
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="day" class="form-label">Day</label>
+                <select class="form-select" id="day" name="day">
+                    <option value="">All Days</option>
+                    <option value="1">Monday</option>
+                    <option value="2">Tuesday</option>
+                    <option value="3">Wednesday</option>
+                    <option value="4">Thursday</option>
+                    <option value="5">Friday</option>
+                    <option value="6">Saturday</option>
+                    <option value="7">Sunday</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="instructor" class="form-label">Instructor</label>
+                <select class="form-select" id="instructor" name="instructor">
+                    <option value="">All Instructors</option>
+                    <!-- Add instructor options dynamically -->
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="fas fa-search"></i> Filter
+                </button>
+                <a href="{% url 'manage_timetable' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-undo"></i> Reset
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Timetable Entries List -->
+{% if timetable_entries %}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">All Timetable Entries</h5>
+            <div class="btn-group btn-group-sm">
+                <button type="button" class="btn btn-outline-primary">
+                    <i class="fas fa-download"></i> Export
+                </button>
+                <button type="button" class="btn btn-outline-success">
+                    <i class="fas fa-print"></i> Print
+                </button>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Course</th>
+                            <th>Day</th>
+                            <th>Time</th>
+                            <th>Duration</th>
+                            <th>Room</th>
+                            <th>Instructor</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in timetable_entries %}
+                            <tr>
+                                <td>
+                                    <strong>{{ entry.course.name }}</strong>
+                                    <br><small class="text-muted">{{ entry.course.code }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">
+                                        {{ entry.get_day_of_week_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <strong>{{ entry.start_time|time:"H:i" }}</strong>
+                                    <br><small class="text-muted">{{ entry.end_time|time:"H:i" }}</small>
+                                </td>
+                                <td>
+                                    {% with duration=entry.end_time|timeuntil:entry.start_time %}
+                                        <span class="badge bg-info">{{ duration }}</span>
+                                    {% endwith %}
+                                </td>
+                                <td>
+                                    {% if entry.room %}
+                                        <i class="fas fa-map-marker-alt text-success"></i> {{ entry.room }}
+                                    {% else %}
+                                        <span class="text-muted">TBA</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if entry.instructor %}
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle me-2">
+                                                {{ entry.instructor.first_name|first }}{{ entry.instructor.last_name|first }}
+                                            </div>
+                                            <div>
+                                                <strong>{{ entry.instructor.get_full_name }}</strong>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">Not assigned</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if entry.class_type == 'lecture' %}
+                                        <span class="badge bg-primary">Lecture</span>
+                                    {% elif entry.class_type == 'lab' %}
+                                        <span class="badge bg-success">Lab</span>
+                                    {% elif entry.class_type == 'tutorial' %}
+                                        <span class="badge bg-warning">Tutorial</span>
+                                    {% else %}
+                                        <span class="badge bg-info">{{ entry.class_type|title }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if entry.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{% url 'edit_timetable_entry' entry.id %}" class="btn btn-outline-primary" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#deleteModal{{ entry.id }}" 
+                                                title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="deleteModal{{ entry.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Confirm Delete</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to delete the timetable entry for <strong>{{ entry.course.name }}</strong> on <strong>{{ entry.get_day_of_week_display }}</strong> at <strong>{{ entry.start_time|time:"H:i" }}</strong>?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <form method="POST" action="{% url 'delete_timetable_entry' entry.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+        <h4 class="text-muted">No Timetable Entries Found</h4>
+        <p class="text-muted">Start by adding some classes to the timetable.</p>
+        <a href="{% url 'add_timetable_entry' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add First Entry
+        </a>
+    </div>
+{% endif %}
+
+<style>
+.avatar-circle {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 12px;
+}
+</style>
+{% endblock %}

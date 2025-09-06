@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard - School Information System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-user-graduate"></i> Student Dashboard</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'profile' %}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-user"></i> My Profile
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Welcome Card -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h4 class="mb-1">Welcome back, {{ user.first_name|default:user.username }}!</h4>
+                        <p class="mb-0">
+                            {% if student %}
+                                Student ID: {{ student.student_id }} | Faculty: {{ student.faculty.name }}
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-graduation-cap fa-3x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Links -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <i class="fas fa-book-open fa-2x text-primary mb-3"></i>
+                <h5 class="card-title">Courses</h5>
+                <p class="card-text">View your enrolled courses</p>
+                <a href="{% url 'course_list' %}" class="btn btn-primary">View Courses</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <i class="fas fa-trophy fa-2x text-success mb-3"></i>
+                <h5 class="card-title">Results</h5>
+                <p class="card-text">Check your academic results</p>
+                <a href="{% url 'result_list' %}" class="btn btn-success">View Results</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <i class="fas fa-table fa-2x text-info mb-3"></i>
+                <h5 class="card-title">Timetable</h5>
+                <p class="card-text">View your class schedule</p>
+                <a href="{% url 'timetable' %}" class="btn btn-info">View Timetable</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <i class="fas fa-calendar-alt fa-2x text-warning mb-3"></i>
+                <h5 class="card-title">Events</h5>
+                <p class="card-text">Upcoming school events</p>
+                <a href="{% url 'event_list' %}" class="btn btn-warning">View Events</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-bell"></i> Recent Announcements</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_announcements %}
+                    {% for announcement in recent_announcements %}
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="flex-shrink-0">
+                                <span class="badge bg-{{ announcement.priority }} rounded-pill">{{ announcement.get_priority_display }}</span>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1">{{ announcement.title }}</h6>
+                                <p class="mb-1 text-muted small">{{ announcement.content|truncatewords:15 }}</p>
+                                <small class="text-muted">{{ announcement.created_at|date:"M d, Y" }}</small>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <a href="{% url 'announcement_list' %}" class="btn btn-sm btn-outline-primary">View All Announcements</a>
+                {% else %}
+                    <p class="text-muted">No recent announcements.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-calendar"></i> Upcoming Events</h5>
+            </div>
+            <div class="card-body">
+                {% if upcoming_events %}
+                    {% for event in upcoming_events %}
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-shrink-0">
+                                <div class="bg-primary text-white rounded text-center p-2" style="min-width: 50px;">
+                                    <div class="fw-bold">{{ event.date|date:"d" }}</div>
+                                    <small>{{ event.date|date:"M" }}</small>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1">{{ event.title }}</h6>
+                                <small class="text-muted">{{ event.start_time }} - {{ event.location }}</small>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <a href="{% url 'event_list' %}" class="btn btn-sm btn-outline-primary">View All Events</a>
+                {% else %}
+                    <p class="text-muted">No upcoming events.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Results -->
+{% if recent_results %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-line"></i> Recent Results</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Course</th>
+                                <th>Grade</th>
+                                <th>GPA</th>
+                                <th>Percentage</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in recent_results %}
+                                <tr>
+                                    <td>{{ result.course.name }}</td>
+                                    <td><span class="badge bg-success">{{ result.grade }}</span></td>
+                                    <td>{{ result.gpa }}</td>
+                                    <td>{{ result.percentage|floatformat:1 }}%</td>
+                                    <td>{{ result.created_at|date:"M d, Y" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <a href="{% url 'result_list' %}" class="btn btn-sm btn-outline-primary">View All Results</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Instructor Management - School Information System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-chalkboard-teacher me-2"></i>Instructor Management
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="{% url 'add_staff' %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-plus"></i> Add Instructor
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card text-center bg-primary text-white">
+                        <div class="card-body">
+                            <i class="fas fa-users fa-2x mb-2"></i>
+                            <h4 class="card-title">{{ total_staff }}</h4>
+                            <p class="card-text">Total Instructors</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center bg-success text-white">
+                        <div class="card-body">
+                            <i class="fas fa-user-check fa-2x mb-2"></i>
+                            <h4 class="card-title">{{ active_staff }}</h4>
+                            <p class="card-text">Active Instructors</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center bg-warning text-white">
+                        <div class="card-body">
+                            <i class="fas fa-user-times fa-2x mb-2"></i>
+                            <h4 class="card-title">{{ inactive_staff }}</h4>
+                            <p class="card-text">Inactive Instructors</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructors Table -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>All Instructors
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if staff_members %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Staff ID</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Department</th>
+                                        <th>Position</th>
+                                        <th>Hire Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for staff in staff_members %}
+                                        <tr>
+                                            <td>
+                                                <strong class="text-primary">{{ staff.staff_id }}</strong>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                                                        {{ staff.user.first_name|first }}{{ staff.user.last_name|first }}
+                                                    </div>
+                                                    <div>
+                                                        <strong>{{ staff.user.get_full_name }}</strong>
+                                                        <br><small class="text-muted">{{ staff.user.username }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>{{ staff.user.email }}</td>
+                                            <td>
+                                                <span class="badge bg-info">{{ staff.department.name }}</span>
+                                            </td>
+                                            <td>{{ staff.position }}</td>
+                                            <td>{{ staff.hire_date|date:"M d, Y" }}</td>
+                                            <td>
+                                                {% if staff.user.is_active %}
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check-circle me-1"></i>Active
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">
+                                                        <i class="fas fa-times-circle me-1"></i>Inactive
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <a href="{% url 'edit_instructor' staff.id %}" class="btn btn-outline-primary" title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <form method="post" action="{% url 'toggle_instructor_status' staff.id %}" class="d-inline">
+                                                        {% csrf_token %}
+                                                        {% if staff.user.is_active %}
+                                                            <button type="submit" class="btn btn-outline-warning" title="Deactivate" onclick="return confirm('Are you sure you want to deactivate this instructor?')">
+                                                                <i class="fas fa-user-slash"></i>
+                                                            </button>
+                                                        {% else %}
+                                                            <button type="submit" class="btn btn-outline-success" title="Activate" onclick="return confirm('Are you sure you want to activate this instructor?')">
+                                                                <i class="fas fa-user-check"></i>
+                                                            </button>
+                                                        {% endif %}
+                                                    </form>
+                                                    <a href="{% url 'delete_instructor' staff.id %}" class="btn btn-outline-danger" title="Delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-chalkboard-teacher fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No Instructors Found</h5>
+                            <p class="text-muted">Get started by adding your first instructor.</p>
+                            <a href="{% url 'add_staff' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Add First Instructor
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-sm {
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .btn-group-sm > .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .card {
+        border: none;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+</style>
+{% endblock %}
